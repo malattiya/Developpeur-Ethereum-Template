@@ -1,0 +1,7 @@
+Interaction avec un smart contract sur le réseau testnet ropsten
+
+Veuillez interagir avec le smart contract déployé sous l’adresse :
+
+ 0x9a5eA74972849E85e258A0B13f3ea22083B219ab
+ 
+ get() == 5777
