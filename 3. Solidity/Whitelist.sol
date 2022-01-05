@@ -15,9 +15,11 @@ contract Whitelist {
     }
 
     //Methode addPerson pour ajouter en memoire un struct 
-    function addPersonne(string memory _name,uint  _age) public {
+    //
+    function addPersonne(string memory _name,uint  _age) public pure {
        Person memory person;
        person.name = _name;
        person.age= _age; 
     }
+
 }
