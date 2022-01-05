@@ -8,6 +8,15 @@ Contrat Whitelist
 contract Whitelist {
     mapping (address=>bool) whitelist;
 
+    event Authorized(address _address); // Event
+
+    /*
+    function bid() public payable {
+        // ...
+        emit HighestBidIncreased(msg.sender, msg.value); // Triggering event
+    }
+    */
+
     //structure Person (string, uint)
     struct Person {
         string name;
@@ -21,5 +30,4 @@ contract Whitelist {
        person.name = _name;
        person.age= _age; 
     }
-
 }
