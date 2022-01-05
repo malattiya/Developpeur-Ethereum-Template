@@ -1,0 +1,64 @@
+{
+	"compiler": {
+		"version": "0.8.11+commit.d7f03943"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "_name",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_age",
+						"type": "uint256"
+					}
+				],
+				"name": "addPersonne",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"3. Solidity/Whitelist.sol": "Whitelist"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"3. Solidity/Whitelist.sol": {
+			"keccak256": "0xafe6bd20a23cbde606652196622d833145dea171fc137094adbc085b416707c9",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://d7df0cba0b6cc816e79f84bda27388c2db65844c66bd0580e932f983cf6c356f",
+				"dweb:/ipfs/QmeEuBB5uvB693pGXjptG1ny3GJ5Kc6hyYs7CXR8KiSGXd"
+			]
+		}
+	},
+	"version": 1
+}
