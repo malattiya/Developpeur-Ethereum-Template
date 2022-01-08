@@ -10,24 +10,8 @@ contract Whitelist {
 
     event Authorized(address _address); // Event
 
-    /*
-    function bid() public payable {
-        // ...
-        emit HighestBidIncreased(msg.sender, msg.value); // Triggering event
-    }
-    */
-
-    //structure Person (string, uint)
-    struct Person {
-        string name;
-        uint age;
-    }
-
-    //Methode addPerson pour ajouter en memoire un struct 
-    //
-    function addPersonne(string memory _name,uint  _age) public pure {
-       Person memory person;
-       person.name = _name;
-       person.age= _age; 
+    function authorize (address _address) public {
+        whitelist[_address] = true; //add address in whitelist
+        emit Authorized(_address); //raise event
     }
 }
