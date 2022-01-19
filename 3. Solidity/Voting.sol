@@ -9,24 +9,40 @@ Contrat Voting
 */
 contract Voting is Ownable{
 
-    WorkflowStatus private _status;
+    uint winningProposalId; //La proposition qui reçoit le plus de vote 
+    uint private totalProposals; //Nbr total de propositions
+    WorkflowStatus private _status; //Le statut du workflow
 
-    constructor () {
-        _status = WorkflowStatus.RegisteringVoters;
-    }
-
+    //Structure qui aide à stocker l'état de vote sur les propsoitions
     struct Proposal {
         string description;
         uint voteCount;
     }
 
+     //Structure qui aide à stocker l'état de chhaque votant
+    struct Voter {
+        bool isRegistered;
+        bool hasVoted;
+        uint votedProposalId;
+    }
+
+    //mapping contenant la liste des votants et leurs états
+    mapping(address=> Voter) _voterlist;
+    //mapping contenant la liste des propositions
     mapping(uint=>Proposal) _proposalList;
-    //Proposal[] proposalsList;
-    uint winningProposalId;
 
+    /*
+        Le constructeur du SC qui sert à initialiser l'état
+    */
+    constructor () {
+        changeWorkflowStatus(WorkflowStatus.RegisteringVoters);
+        totalProposals = 0;
+        winningProposalId = 0;
+    }
 
+    //Statuts du workflow
     enum WorkflowStatus {
-        RegisteringVoters,
+        RegisteringVoters, 
         ProposalsRegistrationStarted,
         ProposalsRegistrationEnded,
         VotingSessionStarted,
@@ -38,14 +54,6 @@ contract Voting is Ownable{
     event WorkflowStatusChange(WorkflowStatus previousStatus, WorkflowStatus newStatus);
     event ProposalRegistered(uint proposalId);
     event Voted(address voter, uint proposalId);
-
-    struct Voter {
-        bool isRegistered;
-        bool hasVoted;
-        uint votedProposalId;
-    }
-
-    mapping(address=> Voter) _voterlist;
     
     /*
         registerProposal enregistrement des propositions dans la liste des propositions
@@ -53,27 +61,33 @@ contract Voting is Ownable{
     function registerProposal(string memory _desc) public {
         require(_voterlist[msg.sender].isRegistered, "Proposals are only accepted from voters !");
         require(_status==WorkflowStatus.ProposalsRegistrationStarted, "Proposals registration ended !");
-        //proposalsList.push(Proposal(_desc, 0));
-        //emit ProposalRegistered(proposalsList.length()+1);
-        _proposalList[_proposalList.length()++]=Proposal(_desc,0);
-        emit ProposalRegistered(_proposalList.length());
+        _proposalList[totalProposals++]=Proposal(_desc,0);
+        emit ProposalRegistered(totalProposals);
     }
 
+    /*
+        voting permet l'enregsitretment des votes sur les propositions
+    */
     function voting(uint _proposalId) public {
-        require(!(_voterlist[msg.sender]).isRegistred, "You are not allowed to vote !");
+        require(!(_voterlist[msg.sender]).isRegistered, "You are not allowed to vote !");
         require(_status==WorkflowStatus.VotingSessionStarted, "Voting session does not started yet !");
         require(!(_voterlist[msg.sender]).hasVoted, "Already voted !");
-        //proposalsList[_proposalId-1].voteCount=proposalsList[_proposalId-1].voteCount++;
-        _proposalsList[_proposalId-1].voteCount++;
-        _voterlist[msg.sender]=Voter(true,true,_proposalId);
+        //assert(_proposalList[totalProposals].voteCount++,"Proposal does not existe !");
+        //On vérifie que le parametre est bien une propostion valide
+        require(_proposalId>0 && _proposalId<=totalProposals,"Proposal does not existe !");
+        _proposalList[totalProposals].voteCount++;
+        _voterlist[msg.sender]=Voter(true,true,totalProposals);
         emit Voted(msg.sender,_proposalId);
     }
 
     /*
         changeWorkflowStatus changement de statut du workflow
     */
-    function changeWorkflowStatus (WorkflowStatus _wfStatus) public onlyOwner {
-        if (_wfStatus==WorkflowStatus.ProposalsRegistrationStarted) {
+    function changeWorkflowStatus (WorkflowStatus _wfStatus) public onlyOwner returns (WorkflowStatus){
+        if (_wfStatus==WorkflowStatus.RegisteringVoters) {
+            emit WorkflowStatusChange (_status, WorkflowStatus.RegisteringVoters);
+            _status = WorkflowStatus.RegisteringVoters;
+        } else if (_wfStatus==WorkflowStatus.ProposalsRegistrationStarted) {
             emit WorkflowStatusChange (_status, WorkflowStatus.ProposalsRegistrationStarted);
             _status = WorkflowStatus.ProposalsRegistrationStarted;
         } else if (_wfStatus==WorkflowStatus.ProposalsRegistrationEnded) {
@@ -86,34 +100,38 @@ contract Voting is Ownable{
             emit WorkflowStatusChange (_status, WorkflowStatus.VotesTallied);
             _status = WorkflowStatus.VotesTallied;
         }
+        return _status;
     }
 
+    /*
+        getStatus retourne le statut actuel du workflow
+    */
     function getStatus () public view returns (WorkflowStatus){
         return _status;
     }
 
-    function registerVoter() public {
-        require (_status==WorkflowStatus.RegisteringVoters, "Registering voters is closed");
-        require(!_voterlist[msg.sender], "This address is already in our voter list !");
-        _voterlist[msg.sender] = true;
+    /*
+        registerVoter permet l'enregistrement des votants sur liste blanche
+    */
+    function registerVoter() public returns (bool){
+        require (_status!=WorkflowStatus.RegisteringVoters, "Registering voters is closed");
+        require(!_voterlist[msg.sender].isRegistered, "This address is already in our voter list !");
+        _voterlist[msg.sender].hasVoted = true;
         emit VoterRegistered(msg.sender);
+        return (true);
     }
 
-    function getWinner() public view returns(uint){
+    /*
+        getWinner retourne la proposition gagnate
+    */
+    function getWinner() public returns(uint){
         require(_status!=WorkflowStatus.VotesTallied, "Votes not tallied yet!");
 
-        winningProposalId = -1;
         uint maxCount = 0;
-        /*for (uint i=0; i++; proposalsList.length()-1) {
-            if (maxCount<proposalsList[i].voteCount) {
+        for (uint i=1; i<=totalProposals; i++) {
+            if (maxCount<_proposalList[i].voteCount) {
                 winningProposalId=i;
-                maxCount=proposalsList[i].voteCount;
-            }
-        }*/
-        for (uint i=0; i++; _proposalsList.length()-1) {
-            if (maxCount<_proposalsList[i].voteCount) {
-                winningProposalId=i;
-                maxCount=_proposalsList[i].voteCount;
+                maxCount=_proposalList[i].voteCount;
             }
         }
         return winningProposalId;
